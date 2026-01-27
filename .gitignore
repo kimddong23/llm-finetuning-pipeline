@@ -112,3 +112,6 @@ temp/
 *.safetensors
 *.gguf
 *.model
+
+# OMC internal files
+.omc/

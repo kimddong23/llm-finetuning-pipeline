@@ -1,0 +1,33 @@
+{
+  "total_samples": 9123,
+  "code_length": {
+    "min": 3.0,
+    "max": 1982.0,
+    "mean": 189.68036829990135,
+    "median": 111.0,
+    "std": 232.80833516025143
+  },
+  "token_count": {
+    "min": 0.0,
+    "max": 495.0,
+    "mean": 47.062917899813655,
+    "median": 27.0,
+    "std": 58.192987133510655
+  },
+  "num_functions": {
+    "min": 0.0,
+    "max": 4.0,
+    "mean": 0.024005261427162118,
+    "median": 0.0,
+    "std": 0.19011608162583254
+  },
+  "num_classes": {
+    "min": 0.0,
+    "max": 12.0,
+    "mean": 0.05831415104680478,
+    "median": 0.0,
+    "std": 0.496284216811826
+  },
+  "percentage_with_type_hints": 0.27403266469363147,
+  "percentage_with_docstrings": 2.323796996601995
+}

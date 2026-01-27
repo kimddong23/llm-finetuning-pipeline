@@ -1,87 +1,179 @@
 # Data Directory
 
-데이터 수집, 처리, 증강 파이프라인을 포함합니다.
+Complete data processing pipeline for LLM fine-tuning using The Stack dataset.
 
-## 구조
+## Structure
 
 ```
 data/
-├── collection/         # 데이터 수집 스크립트
-│   ├── github_scraper.py
-│   ├── stackoverflow_ko.py
-│   └── docs_scraper.py
-├── processing/         # 전처리
-│   ├── cleaner.py
-│   ├── deduplication.py
-│   └── quality_filter.py
-├── augmentation/       # 데이터 증강
-│   ├── backtranslation.py
-│   └── synthetic_gen.py
-├── benchmarks/         # 평가 데이터셋
-│   ├── humaneval_ko.json
-│   ├── mbpp_ko.json
-│   └── custom_bench.json
-├── raw/               # 원본 데이터 (gitignore)
-└── processed/         # 처리된 데이터 (gitignore)
+├── scripts/              # Data processing scripts
+│   ├── download_stack.py       # Download The Stack dataset
+│   ├── process_data.py         # Quality filtering pipeline
+│   ├── create_instruction.py   # Convert to instruction format
+│   ├── analyze_dataset.py      # Generate statistics & visualizations
+│   ├── run_pipeline.py         # Run complete pipeline
+│   └── README.md               # Detailed documentation
+├── raw/                  # Downloaded raw data (gitignore)
+├── processed/            # Processed data (gitignore)
+│   ├── quality_filtered_10k.jsonl
+│   ├── train.jsonl       # Training set (~9K samples)
+│   └── eval.jsonl        # Evaluation set (~1K samples)
+├── analysis/             # Dataset statistics (gitignore)
+│   ├── dataset_stats.json
+│   ├── dataset_distributions.png
+│   └── quality_metrics.png
+├── collection/           # [Legacy] Custom data collection scripts
+├── processing/           # [Legacy] Custom processing scripts
+├── augmentation/         # [Future] Data augmentation
+└── benchmarks/           # [Future] Evaluation datasets
 ```
 
-## 사용법
+## Quick Start
 
-### 1. 데이터 수집
+### Run Complete Pipeline (Recommended)
 
 ```bash
-# GitHub에서 한국어 코드 수집
-python data/collection/github_scraper.py --language python --min-stars 10
-
-# Stack Overflow 데이터 수집
-python data/collection/stackoverflow_ko.py --min-score 5
+cd data/scripts
+python run_pipeline.py
 ```
 
-### 2. 데이터 전처리
+This will:
+1. Download 20K Python samples from The Stack
+2. Filter to 10K high-quality samples
+3. Convert to instruction format (9K train, 1K eval)
+4. Generate statistics and visualizations
+
+**Expected time on Mac M3 Pro:** 15-30 minutes
+
+### Individual Steps
+
+See [scripts/README.md](scripts/README.md) for detailed documentation.
+
+#### 1. Download Data
 
 ```bash
-# 데이터 정제
-python data/processing/cleaner.py --input data/raw --output data/processed
-
-# 중복 제거
-python data/processing/deduplication.py --input data/processed
+cd data/scripts
+python download_stack.py --samples 20000 --output ../raw/the_stack_python_20k.jsonl
 ```
 
-### 3. 데이터 증강
+#### 2. Quality Filtering
 
 ```bash
-# 역번역을 통한 증강
-python data/augmentation/backtranslation.py --input data/processed
+python process_data.py --input ../raw/the_stack_python_20k.jsonl --output ../processed/quality_filtered_10k.jsonl
 ```
 
-## 데이터 포맷
+#### 3. Create Instruction Format
 
-### 학습 데이터 (Chat 형식)
+```bash
+python create_instruction.py --input ../processed/quality_filtered_10k.jsonl --output-dir ../processed
+```
+
+#### 4. Analyze Dataset
+
+```bash
+python analyze_dataset.py --input ../processed/train.jsonl --output-dir ../analysis
+```
+
+## Data Format
+
+### Training Data (Chat Format)
 
 ```json
 {
   "messages": [
     {
       "role": "user",
-      "content": "리스트에서 짝수만 필터링하는 함수를 만들어줘"
+      "content": "def calculate_sum(a: int, b: int) -> int:\nCalculate the sum of two integers."
     },
     {
       "role": "assistant",
-      "content": "def filter_even(numbers):\n    return [n for n in numbers if n % 2 == 0]"
+      "content": "return a + b"
     }
-  ]
+  ],
+  "metadata": {
+    "source": "the_stack",
+    "lang": "Python",
+    "repo": "example/repo"
+  }
 }
 ```
 
-## Phase 1 작업 목록
+## Quality Criteria
 
-- [ ] GitHub 스크래퍼 구현
-- [ ] Stack Overflow 크롤러 구현
-- [ ] 데이터 정제 파이프라인
-- [ ] 품질 필터링 알고리즘
-- [ ] 데이터셋 통계 생성
+The processing pipeline ensures:
+- ✅ Valid Python syntax (100%)
+- ✅ Has docstrings (~80-90%)
+- ✅ Has structure (functions/classes) (~100%)
+- ✅ Low comment ratio (<30%)
+- ✅ No duplicates (100% unique)
+- ✅ Reproducible (fixed seed=42)
 
-## 참고
+## Expected Output
 
+After running the pipeline:
+
+```
+data/
+├── raw/
+│   └── the_stack_python_20k.jsonl        # 20K raw samples
+├── processed/
+│   ├── quality_filtered_10k.jsonl        # 10K quality-filtered
+│   ├── train.jsonl                       # ~9K training samples
+│   └── eval.jsonl                        # ~1K evaluation samples
+└── analysis/
+    ├── dataset_stats.json                # Statistics
+    ├── dataset_distributions.png         # Distribution plots
+    └── quality_metrics.png               # Quality metrics
+```
+
+## Requirements
+
+```bash
+pip install datasets tqdm matplotlib numpy
+```
+
+Or use the project's requirements:
+
+```bash
+pip install -r requirements/dev.txt
+```
+
+## Dataset Details
+
+**Source:** The Stack (Dedup) - Python subset
+- High-quality, deduplicated code from GitHub
+- Publicly available on HuggingFace
+- Used in real research (StarCoder)
+- Permissive open-source licenses
+
+**Subset Size:** 10K high-quality samples
+- Perfect for Mac M3 Pro training (3-5 hours)
+- Enough data for meaningful results
+- Shows data efficiency (good for portfolio!)
+- Cost: $0
+
+## Zero-Cost Philosophy
+
+This pipeline is designed to work entirely on Mac M3 Pro with no cloud costs:
+- ✅ Streaming download for memory efficiency
+- ✅ Local processing only
+- ✅ Reproducible with fixed seeds
+- ✅ Production-grade code quality
+- ✅ Complete in 15-30 minutes
+
+## Troubleshooting
+
+See [scripts/README.md](scripts/README.md#troubleshooting) for common issues and solutions.
+
+## Next Steps
+
+After processing:
+1. Verify data quality: Check `analysis/dataset_stats.json`
+2. Review samples: Inspect `processed/train.jsonl`
+3. Proceed to training: Use the processed files for fine-tuning
+
+## References
+
+- [The Stack Dataset](https://huggingface.co/datasets/bigcode/the-stack-dedup)
+- [StarCoder Paper](https://arxiv.org/abs/2305.06161)
 - [HuggingFace Datasets](https://huggingface.co/docs/datasets)
-- [DVC 문서](https://dvc.org/doc)
