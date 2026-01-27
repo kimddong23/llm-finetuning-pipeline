@@ -10,3 +10,10 @@ pyyaml>=6.0
 python-dotenv>=1.0.0
 requests>=2.31.0
 matplotlib>=3.7.0
+
+# Fine-tuning requirements
+peft>=0.6.0
+accelerate>=0.24.0
+bitsandbytes>=0.41.0
+wandb>=0.16.0
+scipy>=1.10.0
