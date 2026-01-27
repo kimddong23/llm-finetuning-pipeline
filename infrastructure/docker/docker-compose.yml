@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Training environment
+  train:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.train
+    image: korean-code-llm:train
+    container_name: kocode-train
+    volumes:
+      - ../..:/workspace
+      - ~/.cache:/root/.cache  # Cache for models
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+    ports:
+      - "8888:8888"  # Jupyter
+      - "6006:6006"  # TensorBoard
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: tail -f /dev/null
+
+  # Serving API
+  api:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.serve
+    image: korean-code-llm:serve
+    container_name: kocode-api
+    volumes:
+      - ../../results/models:/app/models:ro
+    environment:
+      - MODEL_PATH=/app/models/best_model
+      - MAX_WORKERS=4
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Monitoring (Prometheus)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: kocode-prometheus
+    volumes:
+      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: unless-stopped
+
+  # Monitoring (Grafana)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: kocode-grafana
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus-data:
+  grafana-data:

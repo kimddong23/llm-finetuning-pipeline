@@ -1,0 +1,14 @@
+# Serving requirements
+-r base.txt
+
+# API
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0.0
+
+# Inference optimization
+vllm>=0.2.0
+llama-cpp-python>=0.2.0
+
+# Monitoring
+prometheus-client>=0.19.0

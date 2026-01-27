@@ -1,0 +1,28 @@
+# Training Dockerfile for Korean Code LLM
+FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-devel
+
+WORKDIR /workspace
+
+# System dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    wget \
+    curl \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python dependencies
+COPY requirements/train.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# Copy project files
+COPY . /workspace/
+
+# Install package in editable mode
+RUN pip install -e .
+
+# Expose ports
+EXPOSE 8888  # Jupyter
+EXPOSE 6006  # TensorBoard
+
+CMD ["/bin/bash"]
