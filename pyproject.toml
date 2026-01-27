@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "korean-code-llm"
+name = "llm-finetuning-pipeline"
 version = "0.1.0"
-description = "Production-grade Korean Code Generation LLM"
+description = "Production-grade LLM Fine-tuning Pipeline for Code Generation (Open Source)"
 readme = "README.md"
 authors = [
     {name = "Your Name", email = "your.email@example.com"}
@@ -14,10 +14,12 @@ license = {text = "MIT"}
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 requires-python = ">=3.11"
 dependencies = [
@@ -42,16 +44,16 @@ serve = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/korean-code-llm"
-Documentation = "https://korean-code-llm.readthedocs.io"
-Repository = "https://github.com/yourusername/korean-code-llm"
-Issues = "https://github.com/yourusername/korean-code-llm/issues"
+Homepage = "https://github.com/yourusername/llm-finetuning-pipeline"
+Documentation = "https://llm-finetuning-pipeline.readthedocs.io"
+Repository = "https://github.com/yourusername/llm-finetuning-pipeline"
+Issues = "https://github.com/yourusername/llm-finetuning-pipeline/issues"
 
 [project.scripts]
-kocode = "korean_code_llm.cli:main"
+llm-finetune = "llm_finetuning.cli:main"
 
 [tool.setuptools]
-packages = ["korean_code_llm"]
+packages = ["llm_finetuning"]
 
 [tool.black]
 line-length = 100
@@ -101,12 +103,12 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-ra -q --strict-markers --cov=korean_code_llm"
+addopts = "-ra -q --strict-markers --cov=llm_finetuning"
 testpaths = ["tests"]
 pythonpath = ["."]
 
 [tool.coverage.run]
-source = ["korean_code_llm"]
+source = ["llm_finetuning"]
 omit = ["tests/*", "**/__init__.py"]
 
 [tool.coverage.report]

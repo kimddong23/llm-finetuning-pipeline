@@ -1,27 +1,46 @@
-# 🇰🇷 Korean Code LLM
+# 🚀 LLM Finetuning Pipeline
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-**Production-grade Korean Code Generation LLM**
+**Production-grade LLM Fine-tuning Pipeline for Code Generation**
 
-한국어로 설명하면 한국 개발자 스타일의 코드를 생성하는 LLM. 한국어 주석, 한국어 변수명 지원.
+A complete, reproducible pipeline for fine-tuning Large Language Models on code generation tasks. Built for AI/ML Engineer portfolios with production-level quality.
 
-> 🚧 **현재 상태**: 활발히 개발 중 (Phase 1: 기반 구축)
+> 🚧 **Status**: Actively developing (Phase 1: Foundation)
 >
-> 📅 **타임라인**: 2024년 1월 ~ 2024년 4월 (3개월 프로젝트)
+> 📅 **Timeline**: Jan 2024 ~ Apr 2024 (3-month project)
+>
+> 🌟 **Open Source**: MIT Licensed - Contributions Welcome!
 
 ---
 
-## ✨ 특징
+## 🌟 Why Open Source?
 
-### 🎯 차별점
+This project is **100% open source** to:
+- **Share Knowledge**: Help others learn LLM fine-tuning from a complete, production-grade example
+- **Enable Reuse**: Anyone can fork, adapt, and use this pipeline for their own projects
+- **Build Community**: Collaborate with developers worldwide to improve LLM fine-tuning practices
+- **Demonstrate Skills**: Showcase real-world ML engineering capabilities
 
-- **🔄 완전한 재현성**: Docker + seed 고정 + 상세 로그로 누구나 동일한 결과 재현
-- **📊 철저한 벤치마크**: HumanEval-Ko, MBPP-Ko, 커스텀 벤치마크 포함
-- **🚀 실사용 가능**: REST API, CLI, VS Code 확장 모두 제공
-- **📚 교육적 가치**: 상세한 문서, 튜토리얼, 기술 블로그
+**Feel free to:**
+- ⭐ Star this repo
+- 🍴 Fork and customize
+- 🐛 Report issues
+- 💡 Suggest improvements
+- 🤝 Submit pull requests
+
+---
+
+## ✨ Features
+
+### 🎯 Key Differentiators
+
+- **🔄 Full Reproducibility**: Docker + fixed seeds + detailed logs for identical results
+- **📊 Comprehensive Benchmarks**: HumanEval, MBPP, custom benchmarks
+- **🚀 Production-Ready**: REST API, CLI, VS Code extension
+- **📚 Educational Value**: Detailed docs, tutorials, technical blog posts
 
 ### 🛠️ 기술 스택
 
@@ -37,71 +56,71 @@
 ### 설치
 
 ```bash
-# 클론
-git clone https://github.com/yourusername/korean-code-llm.git
-cd korean-code-llm
+# Clone
+git clone https://github.com/yourusername/llm-finetuning-pipeline.git
+cd llm-finetuning-pipeline
 
-# 환경 설정
+# Setup environment
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# 의존성 설치
+# Install dependencies
 pip install -r requirements/base.txt
 ```
 
-### 사용 예시
+### Usage Example
 
 ```python
-from korean_code_llm import KoreanCodeLLM
+from llm_finetuning import CodeLLM
 
-# 모델 로드
-model = KoreanCodeLLM.from_pretrained("korean-code-llm-2.4b")
+# Load model
+model = CodeLLM.from_pretrained("llm-finetuning-2.4b")
 
-# 코드 생성
-prompt = "리스트에서 짝수만 필터링하는 함수를 만들어줘"
+# Generate code
+prompt = "Write a function to filter even numbers from a list"
 code = model.generate(prompt)
 print(code)
 ```
 
-**출력:**
+**Output:**
 ```python
 def filter_even_numbers(numbers):
-    """리스트에서 짝수만 필터링하는 함수
+    """Filter even numbers from a list
 
     Args:
-        numbers (list): 정수 리스트
+        numbers (list): List of integers
 
     Returns:
-        list: 짝수만 포함된 리스트
+        list: List containing only even numbers
     """
     return [num for num in numbers if num % 2 == 0]
 ```
 
 ---
 
-## 📊 성능
+## 📊 Performance
 
-| 벤치마크 | Base Model | **Korean Code LLM** | 개선 |
+| Benchmark | Base Model | **Fine-tuned** | Improvement |
 |---------|-----------|---------------------|-----|
-| HumanEval-Ko | 45.1% | **TBD** | TBD |
-| MBPP-Ko | 38.2% | **TBD** | TBD |
+| HumanEval | 45.1% | **TBD** | TBD |
+| MBPP | 38.2% | **TBD** | TBD |
 | Custom-Bench | - | **TBD** | - |
 
-> 🚧 벤치마크 결과는 Phase 3 (Week 7-8)에 업데이트됩니다.
+> 🚧 Benchmark results will be updated in Phase 3 (Week 7-8).
 
 ---
 
-## 📁 프로젝트 구조
+## 📁 Project Structure
 
 ```
-korean-code-llm/
-├── 📊 data/                  # 데이터 파이프라인
-├── 🧪 experiments/           # 실험 및 학습
-├── 🚀 deployment/            # 배포 (API, CLI, 확장)
+llm-finetuning-pipeline/
+├── 📊 data/                  # Data pipeline
+├── 🧪 experiments/           # Training & evaluation
+├── 🚀 deployment/            # API, CLI, extensions
 ├── 🐳 infrastructure/        # Docker, CI/CD
-├── 📚 docs/                  # 문서 및 튜토리얼
-├── 🧪 tests/                 # 테스트
-└── 📊 results/               # 실험 결과
+├── 📚 docs/                  # Documentation
+├── 🧪 tests/                 # Tests
+└── 📊 results/               # Experiment results
 ```
 
 전체 구조는 [ARCHITECTURE.md](docs/ARCHITECTURE.md)를 참고하세요.
