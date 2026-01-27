@@ -1,0 +1,160 @@
+# =============================================================================
+# QLoRA Training Base Configuration
+# =============================================================================
+# This is the base configuration file for QLoRA fine-tuning.
+# Model-specific configs inherit and override these settings.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Model Settings
+# -----------------------------------------------------------------------------
+model:
+  model_name: "LGAI-EXAONE/EXAONE-3.5-2.4B-Instruct"
+  cache_dir: null  # Uses HF_HOME or ~/.cache/huggingface
+  trust_remote_code: true
+  use_flash_attention_2: false  # Set true if supported
+
+# -----------------------------------------------------------------------------
+# QLoRA/LoRA Settings
+# -----------------------------------------------------------------------------
+lora:
+  r: 16                    # LoRA rank (higher = more capacity, more memory)
+  alpha: 32                # LoRA alpha (scaling factor, typically 2x rank)
+  dropout: 0.05            # LoRA dropout for regularization
+  bias: "none"             # Bias type: "none", "all", or "lora_only"
+  task_type: "CAUSAL_LM"   # Task type for PEFT
+  target_modules:          # Modules to apply LoRA (model-specific)
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+
+# -----------------------------------------------------------------------------
+# Quantization Settings (for CUDA)
+# -----------------------------------------------------------------------------
+quantization:
+  load_in_4bit: true           # Enable 4-bit quantization
+  bnb_4bit_quant_type: "nf4"   # Quantization type: "nf4" or "fp4"
+  bnb_4bit_compute_dtype: "bfloat16"  # Compute dtype
+  bnb_4bit_use_double_quant: true     # Double quantization for memory
+
+# -----------------------------------------------------------------------------
+# Training Hyperparameters
+# -----------------------------------------------------------------------------
+training:
+  # Batch settings
+  per_device_train_batch_size: 4
+  per_device_eval_batch_size: 4
+  gradient_accumulation_steps: 4  # Effective batch = 4 * 4 = 16
+
+  # Training duration
+  num_train_epochs: 3
+  max_steps: -1  # -1 means use num_train_epochs
+
+  # Learning rate
+  learning_rate: 2.0e-4
+  weight_decay: 0.01
+  warmup_steps: 100
+  warmup_ratio: 0.0  # Alternative to warmup_steps
+
+  # Scheduler
+  lr_scheduler_type: "cosine"  # cosine, linear, constant, etc.
+
+  # Gradient handling
+  max_grad_norm: 1.0  # Gradient clipping
+  gradient_checkpointing: true  # Memory optimization
+
+  # Mixed precision (auto-configured based on device)
+  fp16: false  # Set by hardware detection
+  bf16: false  # Set by hardware detection
+
+# -----------------------------------------------------------------------------
+# Data Settings
+# -----------------------------------------------------------------------------
+data:
+  train_file: "data/processed/train.jsonl"
+  eval_file: "data/processed/eval.jsonl"
+  max_length: 2048  # Maximum sequence length
+  preprocessing_num_workers: 4
+
+  # Data format
+  format: "messages"  # messages (chat format) or text
+  system_prompt: null  # Optional system prompt to prepend
+
+# -----------------------------------------------------------------------------
+# Optimizer Settings
+# -----------------------------------------------------------------------------
+optimizer:
+  optimizer_type: "adamw_torch"  # adamw_torch, adamw_8bit, paged_adamw_8bit
+  adam_beta1: 0.9
+  adam_beta2: 0.999
+  adam_epsilon: 1.0e-8
+
+# -----------------------------------------------------------------------------
+# Logging & Saving
+# -----------------------------------------------------------------------------
+logging:
+  output_dir: "results/models/qlora-baseline"
+  logging_dir: "experiments/logs"
+  logging_steps: 10
+  logging_first_step: true
+  log_level: "info"  # debug, info, warning, error
+
+saving:
+  save_steps: 200
+  save_total_limit: 3  # Keep only last N checkpoints
+  save_on_each_node: false
+  load_best_model_at_end: true
+
+# -----------------------------------------------------------------------------
+# Evaluation
+# -----------------------------------------------------------------------------
+evaluation:
+  eval_steps: 200
+  evaluation_strategy: "steps"  # steps, epoch, no
+  metric_for_best_model: "eval_loss"
+  greater_is_better: false
+
+  # Early stopping
+  early_stopping: true
+  early_stopping_patience: 5
+  early_stopping_threshold: 0.001
+
+# -----------------------------------------------------------------------------
+# Hardware & Device Settings
+# -----------------------------------------------------------------------------
+hardware:
+  device: "auto"  # auto, cuda, mps, cpu
+  use_mps: true   # Enable MPS for Apple Silicon
+  seed: 42        # Random seed for reproducibility
+  dataloader_num_workers: 0  # 0 for Mac compatibility
+  dataloader_pin_memory: false  # False for MPS
+
+# -----------------------------------------------------------------------------
+# Weights & Biases Integration
+# -----------------------------------------------------------------------------
+wandb:
+  use_wandb: false
+  project: "llm-finetuning"
+  entity: null  # Your W&B username or team
+  run_name: null  # Auto-generated if null
+  tags:
+    - "qlora"
+    - "code-generation"
+  notes: "QLoRA fine-tuning for Korean code generation"
+
+# -----------------------------------------------------------------------------
+# Memory Optimization (Mac M3 Pro specific)
+# -----------------------------------------------------------------------------
+memory:
+  # For Mac M3 Pro with 18GB unified memory
+  # These settings help prevent OOM errors
+  max_memory_allocation: null  # Let PyTorch manage
+  clear_cache_steps: 100  # Clear MPS cache periodically
+  enable_memory_efficient_attention: true
+
+  # Reduce memory footprint
+  optim_memory_efficient: true

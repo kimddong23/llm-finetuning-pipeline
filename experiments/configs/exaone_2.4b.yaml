@@ -1,0 +1,78 @@
+# =============================================================================
+# EXAONE-3.5-2.4B-Instruct Configuration
+# =============================================================================
+# LG AI Research's EXAONE model - optimized for Korean language understanding
+# Model size: 2.4B parameters
+# Recommended for: Mac M3 Pro (18GB), limited VRAM GPUs
+# =============================================================================
+
+# Inherit from base config
+_base_: "base_config.yaml"
+
+# -----------------------------------------------------------------------------
+# Model Settings
+# -----------------------------------------------------------------------------
+model:
+  model_name: "LGAI-EXAONE/EXAONE-3.5-2.4B-Instruct"
+  trust_remote_code: true
+  use_flash_attention_2: false  # Not supported on MPS
+
+# -----------------------------------------------------------------------------
+# LoRA Settings (EXAONE-optimized)
+# -----------------------------------------------------------------------------
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules:
+    - "q_proj"
+    - "v_proj"  # EXAONE: focus on q and v projections
+
+# -----------------------------------------------------------------------------
+# Training Settings (Mac M3 Pro optimized)
+# -----------------------------------------------------------------------------
+training:
+  per_device_train_batch_size: 2  # Reduced for memory
+  per_device_eval_batch_size: 2
+  gradient_accumulation_steps: 8  # Effective batch = 16
+
+  num_train_epochs: 3
+  learning_rate: 2.0e-4
+  warmup_steps: 100
+
+  gradient_checkpointing: true
+  max_grad_norm: 1.0
+
+# -----------------------------------------------------------------------------
+# Data Settings
+# -----------------------------------------------------------------------------
+data:
+  max_length: 1024  # Reduced for memory efficiency
+
+# -----------------------------------------------------------------------------
+# Logging & Saving
+# -----------------------------------------------------------------------------
+logging:
+  output_dir: "results/models/qlora-exaone-2.4b"
+  logging_steps: 10
+
+saving:
+  save_steps: 200
+  save_total_limit: 3
+
+# -----------------------------------------------------------------------------
+# Evaluation
+# -----------------------------------------------------------------------------
+evaluation:
+  eval_steps: 200
+
+# -----------------------------------------------------------------------------
+# W&B Settings
+# -----------------------------------------------------------------------------
+wandb:
+  run_name: "exaone-2.4b-qlora"
+  tags:
+    - "exaone"
+    - "2.4b"
+    - "korean"
+    - "code-generation"
