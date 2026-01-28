@@ -1,0 +1,53 @@
+============================================================
+Code Generation Evaluation Results
+============================================================
+
+Task: Fibonacci
+------------------------------------------------------------
+Prompt:
+Write a Python function to compute the nth Fibonacci number.
+
+def fibonacci(n: int) -> int:
+    """Returns the nth Fibonacci number."""
+
+
+Generated:
+if n <= 0:
+        return 0
+    elif n == 1:
+        return 1
+    else:
+        a, b = 0, 1
+        for _ in range(2, n + 1):
+            a, b = b, a + b
+        return b
+============================================================
+
+Task: Palindrome
+------------------------------------------------------------
+Prompt:
+Write a Python function to check if a string is a palindrome.
+
+def is_palindrome(s: str) -> bool:
+    """Returns True if s is a palindrome."""
+
+
+Generated:
+if len(s) < 2:
+        return True
+    return s == s[::-1]
+============================================================
+
+Task: List Sum
+------------------------------------------------------------
+Prompt:
+Write a Python function to sum all numbers in a list.
+
+def sum_list(numbers: list) -> int:
+    """Returns the sum of all numbers in the list."""
+
+
+Generated:
+return sum(numbers)
+============================================================
+
