@@ -32,13 +32,14 @@ lora:
 # Training Settings (Mac M3 Pro optimized)
 # -----------------------------------------------------------------------------
 training:
-  per_device_train_batch_size: 2  # Reduced for memory
-  per_device_eval_batch_size: 2
-  gradient_accumulation_steps: 8  # Effective batch = 16
+  per_device_train_batch_size: 4  # Balanced for 18GB RAM
+  per_device_eval_batch_size: 4
+  gradient_accumulation_steps: 2  # Effective batch = 8
 
-  num_train_epochs: 3
+  num_train_epochs: 1  # Reduced to 1 epoch for faster iteration
+  max_steps: 500  # Fast prototype - 44% of full epoch
   learning_rate: 2.0e-4
-  warmup_steps: 100
+  warmup_steps: 50  # Reduced proportionally
 
   gradient_checkpointing: true
   max_grad_norm: 1.0
@@ -47,7 +48,7 @@ training:
 # Data Settings
 # -----------------------------------------------------------------------------
 data:
-  max_length: 1024  # Reduced for memory efficiency
+  max_length: 512  # Fast prototype training
 
 # -----------------------------------------------------------------------------
 # Logging & Saving
@@ -57,14 +58,14 @@ logging:
   logging_steps: 10
 
 saving:
-  save_steps: 200
-  save_total_limit: 3
+  save_steps: 100  # More frequent saves
+  save_total_limit: 5
 
 # -----------------------------------------------------------------------------
 # Evaluation
 # -----------------------------------------------------------------------------
 evaluation:
-  eval_steps: 200
+  eval_steps: 100  # More frequent evaluation
 
 # -----------------------------------------------------------------------------
 # W&B Settings
