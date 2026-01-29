@@ -181,6 +181,8 @@ def main():
         per_device_eval_batch_size=PER_DEVICE_TRAIN_BATCH_SIZE,
         gradient_accumulation_steps=GRADIENT_ACCUMULATION_STEPS,
         learning_rate=LEARNING_RATE,
+        max_grad_norm=1.0,  # Gradient clipping to prevent explosion
+        warmup_steps=100,  # Learning rate warmup
         logging_steps=10,
         eval_strategy="steps",
         eval_steps=EVAL_STEPS,
