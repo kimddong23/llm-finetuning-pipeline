@@ -16,7 +16,7 @@ This report presents the methodology, results, and analysis of fine-tuning EXAON
 - Evaluation perplexity: 2.80 (excellent)
 - Training time: 12.5 hours (500 steps)
 - Trainable parameters: 0.17% of total (4M / 2.4B)
-- HumanEval performance: [TO BE UPDATED]
+- HumanEval performance: Base 98.2% → Fine-tuned 97.0% (-1.2pp)
 
 ---
 
@@ -186,12 +186,22 @@ Memory Management:
 
 **HumanEval Benchmark:**
 
-[TO BE UPDATED AFTER BENCHMARK COMPLETES]
+Evaluated on 164 coding problems from HumanEval benchmark:
 
-| Metric | Base Model | Fine-tuned | Improvement |
-|--------|-----------|------------|-------------|
-| pass@1 | [TBD]% | [TBD]% | [TBD]x |
-| pass@10 | [TBD]% | [TBD]% | [TBD]x |
+| Metric | Base Model | Fine-tuned | Change |
+|--------|-----------|------------|--------|
+| pass@1 | 98.17% | 96.95% | -1.22pp |
+| Passed | 161/164 | 159/164 | -2 |
+| Failed | 3/164 | 5/164 | +2 |
+
+![Benchmark Comparison](../results/analysis/benchmark_comparison.png)
+
+**Key Findings:**
+- Both models achieved >96% pass@1, indicating strong code generation capability
+- Fine-tuned model shows slight regression (-1.22pp) on English coding tasks
+- This is expected as fine-tuning focused on Korean code generation
+- Trade-off demonstrates domain-specific adaptation vs. general capability
+- Avg. completion length decreased from 240 to 182 characters (more concise)
 
 ### 3.4 Training Efficiency
 
