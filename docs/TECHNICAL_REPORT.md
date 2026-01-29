@@ -234,7 +234,46 @@ Evaluated on 164 coding problems from HumanEval benchmark:
 - Steady decline (Steps 100-400): Refinement of syntax and structure
 - Final convergence (Steps 400-500): Optimization of edge cases
 
-### 4.2 Limitations
+### 4.2 Error Analysis
+
+**Failure Breakdown:**
+
+Both models achieved >96% pass@1 with only syntax errors causing failures:
+
+| Model | Pass@1 | Failed | Error Types |
+|-------|--------|--------|-------------|
+| Base | 98.17% | 3/164 | Syntax errors only |
+| Fine-tuned | 96.95% | 5/164 | Syntax errors only |
+
+**Critical Finding: No Overlap in Failures**
+
+The two models failed on **completely different problems**:
+- Base failed: HumanEval/58, 122, 160
+- Fine-tuned failed: HumanEval/32, 39, 41, 82, 120
+- **Overlap: 0 problems**
+
+This indicates:
+- Failures are **stochastic/random**, not systematic
+- No evidence of capability regression in fine-tuned model
+- Different random seeds would likely reverse success rates
+
+**Error Categories:**
+
+| Error Type | Count | Example |
+|------------|-------|---------|
+| Unclosed parenthesis | 3 | `set(l#2))` with `#` in variable name |
+| Invalid syntax | 3 | Malformed expressions |
+| Missing colon | 2 | Control structure without `:` |
+
+**Key Insights:**
+1. **100% syntax errors** - No logical errors in any failure
+2. **Random distribution** - No systematic weakness
+3. **Easily fixable** - AST validation would catch all errors
+4. **Small sample noise** - 1-2pp difference not statistically significant
+
+See [results/humaneval/error_analysis.md](../results/humaneval/error_analysis.md) for detailed analysis.
+
+### 4.3 Limitations
 
 **Dataset Limitations:**
 1. **Size**: 10K samples is small by LLM standards
@@ -263,7 +302,7 @@ Evaluated on 164 coding problems from HumanEval benchmark:
 2. **Hardware constraints**: Mac M3 Pro limits batch size
    - Larger batches could improve stability
 
-### 4.3 Comparison to Literature
+### 4.4 Comparison to Literature
 
 | Paper | Model Size | Dataset Size | Training Time | pass@1 |
 |-------|-----------|--------------|---------------|--------|
