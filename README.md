@@ -429,8 +429,8 @@ llm-finetuning-pipeline/
 ### ✅ Phase 2: Model Training (Complete)
 - [x] Set up QLoRA training infrastructure
 - [x] Baseline experiment (EXAONE-2.4B)
-- [ ] Model comparison (3 models: EXAONE, Phi-4-mini-reasoning*, Qwen2.5-Coder)
-  - *Note: Phi-4 replaced Llama-3.2-3B due to gated access constraints
+- [ ] Model comparison (EXAONE vs Qwen2.5-Coder)
+  - *Note: 2-model comparison due to hardware constraints (Mac M3 Pro 18GB RAM limit)
 - [ ] LoRA rank ablation study
 - [ ] Learning rate optimization
 - [ ] Data scaling analysis

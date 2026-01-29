@@ -475,33 +475,35 @@ llm-finetuning-pipeline/
 
 #### Week 4: Model Comparison
 
-**⚠️ Implementation Change:**
-- **Original Plan**: EXAONE-2.4B, Llama-3.2-3B, Qwen2.5-Coder-3B
-- **Actual Models**: EXAONE-2.4B, Phi-4-mini-reasoning (3.8B), Qwen2.5-Coder-3B
+**⚠️ Hardware Constraint Discovery:**
+- **Original Plan**: Compare 3 models (EXAONE-2.4B, Llama-3.2-3B, Qwen2.5-Coder-3B)
+- **Constraint 1**: Llama-3.2-3B requires gated access (unpredictable approval)
+- **Constraint 2**: Models ≥3B parameters exceed Mac M3 Pro 18GB RAM capacity
+  - Attempted: Phi-4-mini-reasoning (3.8B) as Llama replacement
+  - Result: ❌ Memory insufficient even with 4-bit quantization
+  - Error: "Some modules are dispatched on the CPU or disk"
 
-**Rationale for Phi-4 Replacement:**
-- **Constraint**: Llama-3.2-3B requires HuggingFace gated access approval
-  - Unpredictable wait time (hours to days)
-  - Risk of request rejection (documented cases in HF forums)
-- **Solution**: Phi-4-mini-reasoning (Microsoft, 2026)
-  - ✅ Non-gated, immediate availability
-  - ✅ Superior performance vs Llama-3.2-3B (proven benchmarks)
-  - ✅ Similar parameter count (3.8B vs 3.0B)
-  - ✅ Maintains 3-model comparison methodology
-- **Impact**: Zero-cost constraint requires adapting to available resources
-- **Key Learning**: Real ML engineering = methodological rigor under practical constraints
+**Adapted Approach:**
+- **Final Models**: EXAONE-2.4B (baseline) vs Qwen2.5-Coder-3B (code-specialized)
+- **Rationale**:
+  - ✅ Demonstrates model comparison methodology under real constraints
+  - ✅ Qwen2.5-Coder pre-trained on code (expected best performer)
+  - ✅ Validates hardware-aware model selection (critical for zero-cost portfolios)
+  - ✅ Focuses resources on ablation studies (Week 5-6) - more methodologically valuable
+- **Portfolio Value**: Shows problem-solving under resource constraints
+- **Key Learning**: Zero-cost ML engineering requires hardware-aware decisions
 
 **Tasks:**
 - [x] Train EXAONE-2.4B (baseline) - ✅ Complete
-- [ ] Train Phi-4-mini-reasoning (3.8B) - replacing Llama-3.2-3B
-- [ ] Train Qwen2.5-Coder-3B
-- [ ] Compare all three models
+- [x] Attempt 3B+ model loading - ❌ Hardware constraint discovered
+- [ ] Train Qwen2.5-Coder-3B (code-specialized)
+- [ ] Compare EXAONE vs Qwen (2 models)
 - [ ] Statistical significance testing
-- [ ] Select best base model
+- [ ] Document constraint-driven decisions
 
 **Expected Insight:**
 - Qwen2.5-Coder likely best (pre-trained on code)
-- Trade-off: size vs performance
+- Hardware constraints are real considerations in portfolio projects
 
 #### Week 5: LoRA Rank Ablation
 - [ ] Train with r=8, 16, 32, 64
