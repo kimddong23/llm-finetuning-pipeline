@@ -115,7 +115,7 @@ def setup_model_and_tokenizer():
     return model, tokenizer
 
 def load_and_prepare_data(tokenizer):
-    """Load and tokenize datasets."""
+    """Load and tokenize datasets using chat template (same as baseline)."""
     print("Loading datasets...")
 
     dataset = load_dataset(
@@ -127,24 +127,57 @@ def load_and_prepare_data(tokenizer):
     )
 
     def tokenize_function(examples):
-        """Tokenize conversations."""
+        """Tokenize conversations using chat template."""
         texts = []
+
         for messages in examples["messages"]:
-            # Format: user message + assistant response
-            text = ""
-            for msg in messages:
-                if msg["role"] == "user":
-                    text += f"User: {msg['content']}\n"
-                elif msg["role"] == "assistant":
-                    text += f"Assistant: {msg['content']}\n"
+            # Use chat template if available (same as baseline)
+            if hasattr(tokenizer, "apply_chat_template"):
+                try:
+                    text = tokenizer.apply_chat_template(
+                        messages,
+                        tokenize=False,
+                        add_generation_prompt=False,
+                    )
+                except Exception as e:
+                    # Fallback to simple format
+                    text = ""
+                    for msg in messages:
+                        if msg["role"] == "user":
+                            text += f"User: {msg['content']}\n"
+                        elif msg["role"] == "assistant":
+                            text += f"Assistant: {msg['content']}\n"
+            else:
+                # Simple fallback format
+                text = ""
+                for msg in messages:
+                    if msg["role"] == "user":
+                        text += f"User: {msg['content']}\n"
+                    elif msg["role"] == "assistant":
+                        text += f"Assistant: {msg['content']}\n"
+
             texts.append(text)
 
-        return tokenizer(
+        # Tokenize with proper settings (same as baseline)
+        encodings = tokenizer(
             texts,
             truncation=True,
             max_length=MAX_SEQ_LENGTH,
-            padding=False,
+            padding="max_length",  # Pad to max_length for stable training
+            return_tensors=None,  # Return lists for datasets
         )
+
+        # Create labels (same as input_ids, but pad tokens = -100)
+        labels = []
+        for input_ids in encodings["input_ids"]:
+            label_ids = [
+                -100 if token_id == tokenizer.pad_token_id else token_id
+                for token_id in input_ids
+            ]
+            labels.append(label_ids)
+
+        encodings["labels"] = labels
+        return encodings
 
     tokenized_datasets = dataset.map(
         tokenize_function,

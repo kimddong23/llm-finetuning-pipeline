@@ -1,8 +1,5 @@
 """
-Train Qwen2.5-Coder-3B with QLoRA for model comparison.
-Week 4: Model Comparison Experiment (Adapted for Hardware Constraints)
-
-Final comparison: EXAONE-2.4B (baseline) vs Qwen2.5-Coder-3B (code-specialized)
+Quick test script for Qwen training - runs only 10 steps to verify setup.
 """
 
 import os
@@ -20,48 +17,38 @@ from transformers import (
     Trainer,
     DataCollatorForLanguageModeling,
 )
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
-import bitsandbytes as bnb
+from peft import LoraConfig, get_peft_model
 
 # Configuration
 MODEL_NAME = "Qwen/Qwen2.5-Coder-3B-Instruct"
 
-# Get project root directory (2 levels up from this script)
+# Get project root
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 
-OUTPUT_DIR = os.path.join(PROJECT_ROOT, "results/models/qwen2.5-coder-3b-qlora")
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "results/models/qwen-test")
 TRAIN_FILE = os.path.join(PROJECT_ROOT, "data/processed/train.jsonl")
 EVAL_FILE = os.path.join(PROJECT_ROOT, "data/processed/eval.jsonl")
 
-# QLoRA settings (same as baseline)
+# QLoRA settings
 LORA_R = 16
 LORA_ALPHA = 32
 LORA_DROPOUT = 0.05
 TARGET_MODULES = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
 
-# Training settings (same as baseline)
-MAX_STEPS = 500
+# Test settings - only 10 steps
+MAX_STEPS = 10
 PER_DEVICE_TRAIN_BATCH_SIZE = 1
 GRADIENT_ACCUMULATION_STEPS = 4
 LEARNING_RATE = 2e-4
 MAX_SEQ_LENGTH = 512
-EVAL_STEPS = 100
-SAVE_STEPS = 100
 
 def setup_model_and_tokenizer():
-    """Load model and tokenizer.
-
-    Note: Mac M3 Pro (MPS) does not support 4-bit quantization.
-    We use float16 instead, same as baseline training.
-    """
+    """Load model and tokenizer."""
     print(f"Loading model: {MODEL_NAME}")
 
     # Detect device
-    if torch.cuda.is_available():
-        device = "cuda"
-        print("Using CUDA with 4-bit quantization")
-    elif torch.backends.mps.is_available():
+    if torch.backends.mps.is_available():
         device = "mps"
         print("Using MPS (Mac M3 Pro) with float16")
     else:
@@ -73,26 +60,14 @@ def setup_model_and_tokenizer():
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    # Load model based on device
-    if device == "cuda":
-        # CUDA: use 4-bit quantization
-        model = AutoModelForCausalLM.from_pretrained(
-            MODEL_NAME,
-            load_in_4bit=True,
-            torch_dtype=torch.float16,
-            device_map="auto",
-            trust_remote_code=True,
-        )
-        model = prepare_model_for_kbit_training(model)
-    else:
-        # MPS/CPU: use float16 without quantization
-        model = AutoModelForCausalLM.from_pretrained(
-            MODEL_NAME,
-            torch_dtype=torch.float16,
-            trust_remote_code=True,
-            low_cpu_mem_usage=True,
-        )
-        model = model.to(device)
+    # Load model
+    model = AutoModelForCausalLM.from_pretrained(
+        MODEL_NAME,
+        torch_dtype=torch.float16,
+        trust_remote_code=True,
+        low_cpu_mem_usage=True,
+    )
+    model = model.to(device)
 
     # Configure LoRA
     lora_config = LoraConfig(
@@ -105,16 +80,13 @@ def setup_model_and_tokenizer():
     )
 
     model = get_peft_model(model, lora_config)
-
-    # Enable gradient for input embeddings (required for LoRA + gradient checkpointing)
     model.enable_input_require_grads()
-
     model.print_trainable_parameters()
 
     return model, tokenizer
 
 def load_and_prepare_data(tokenizer):
-    """Load and tokenize datasets using chat template (same as baseline)."""
+    """Load and tokenize datasets."""
     print("Loading datasets...")
 
     dataset = load_dataset(
@@ -130,7 +102,6 @@ def load_and_prepare_data(tokenizer):
         texts = []
 
         for messages in examples["messages"]:
-            # Use chat template if available (same as baseline)
             if hasattr(tokenizer, "apply_chat_template"):
                 try:
                     text = tokenizer.apply_chat_template(
@@ -138,8 +109,7 @@ def load_and_prepare_data(tokenizer):
                         tokenize=False,
                         add_generation_prompt=False,
                     )
-                except Exception as e:
-                    # Fallback to simple format
+                except Exception:
                     text = ""
                     for msg in messages:
                         if msg["role"] == "user":
@@ -147,7 +117,6 @@ def load_and_prepare_data(tokenizer):
                         elif msg["role"] == "assistant":
                             text += f"Assistant: {msg['content']}\n"
             else:
-                # Simple fallback format
                 text = ""
                 for msg in messages:
                     if msg["role"] == "user":
@@ -157,16 +126,14 @@ def load_and_prepare_data(tokenizer):
 
             texts.append(text)
 
-        # Tokenize with proper settings (same as baseline)
         encodings = tokenizer(
             texts,
             truncation=True,
             max_length=MAX_SEQ_LENGTH,
-            padding="max_length",  # Pad to max_length for stable training
-            return_tensors=None,  # Return lists for datasets
+            padding="max_length",
+            return_tensors=None,
         )
 
-        # Create labels (same as input_ids, but pad tokens = -100)
         labels = []
         for input_ids in encodings["input_ids"]:
             label_ids = [
@@ -192,74 +159,46 @@ def load_and_prepare_data(tokenizer):
 
 def main():
     print("="*60)
-    print("QWEN2.5-CODER-3B TRAINING - MODEL COMPARISON")
-    print("="*60)
-    print(f"Model: {MODEL_NAME}")
-    print(f"LoRA r: {LORA_R}, alpha: {LORA_ALPHA}")
-    print(f"Max steps: {MAX_STEPS}")
-    print(f"Learning rate: {LEARNING_RATE}")
-    print(f"Output: {OUTPUT_DIR}")
+    print("QWEN TEST - 10 STEPS ONLY")
     print("="*60)
 
-    # Setup
     model, tokenizer = setup_model_and_tokenizer()
     tokenized_datasets = load_and_prepare_data(tokenizer)
 
-    # Training arguments
     training_args = TrainingArguments(
         output_dir=OUTPUT_DIR,
         max_steps=MAX_STEPS,
         per_device_train_batch_size=PER_DEVICE_TRAIN_BATCH_SIZE,
-        per_device_eval_batch_size=PER_DEVICE_TRAIN_BATCH_SIZE,
         gradient_accumulation_steps=GRADIENT_ACCUMULATION_STEPS,
         learning_rate=LEARNING_RATE,
-        max_grad_norm=1.0,  # Gradient clipping to prevent explosion
-        warmup_steps=100,  # Learning rate warmup
-        logging_steps=10,
-        eval_strategy="steps",
-        eval_steps=EVAL_STEPS,
-        save_strategy="steps",
-        save_steps=SAVE_STEPS,
-        save_total_limit=3,
-        load_best_model_at_end=True,
-        metric_for_best_model="eval_loss",
-        greater_is_better=False,
+        max_grad_norm=1.0,
+        warmup_steps=2,
+        logging_steps=1,
+        save_strategy="no",  # Don't save for test
         fp16=True,
         report_to="none",
         gradient_checkpointing=True,
     )
 
-    # Data collator
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
         mlm=False,
     )
 
-    # Trainer
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=tokenized_datasets["train"],
-        eval_dataset=tokenized_datasets["validation"],
         data_collator=data_collator,
     )
 
-    # Train
-    print("\nStarting training...")
+    print("\nStarting test training (10 steps)...")
     trainer.train()
 
-    # Save final model
-    print(f"\nSaving final model to {OUTPUT_DIR}/final_model")
-    trainer.save_model(f"{OUTPUT_DIR}/final_model")
-    tokenizer.save_pretrained(f"{OUTPUT_DIR}/final_model")
-
-    # Save best model
-    print(f"Saving best model to {OUTPUT_DIR}/best_model")
-    trainer.save_model(f"{OUTPUT_DIR}/best_model")
-    tokenizer.save_pretrained(f"{OUTPUT_DIR}/best_model")
-
-    print("\n✅ Training complete!")
-    print(f"Models saved to: {OUTPUT_DIR}")
+    print("\n✅ Test complete! Check the logs above:")
+    print("- If you see loss values (not NaN), it works!")
+    print("- If you see grad_norm values (not NaN), it works!")
+    print("- If loss is reasonable (~2-4), proceed with full training!")
 
 if __name__ == "__main__":
     main()
