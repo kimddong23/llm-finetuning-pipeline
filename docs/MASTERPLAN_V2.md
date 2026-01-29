@@ -474,8 +474,26 @@ llm-finetuning-pipeline/
 - MBPP pass@1: ~20-25%
 
 #### Week 4: Model Comparison
-- [ ] Train EXAONE-2.4B (baseline)
-- [ ] Train Llama-3.2-3B
+
+**⚠️ Implementation Change:**
+- **Original Plan**: EXAONE-2.4B, Llama-3.2-3B, Qwen2.5-Coder-3B
+- **Actual Models**: EXAONE-2.4B, Phi-4-mini-reasoning (3.8B), Qwen2.5-Coder-3B
+
+**Rationale for Phi-4 Replacement:**
+- **Constraint**: Llama-3.2-3B requires HuggingFace gated access approval
+  - Unpredictable wait time (hours to days)
+  - Risk of request rejection (documented cases in HF forums)
+- **Solution**: Phi-4-mini-reasoning (Microsoft, 2026)
+  - ✅ Non-gated, immediate availability
+  - ✅ Superior performance vs Llama-3.2-3B (proven benchmarks)
+  - ✅ Similar parameter count (3.8B vs 3.0B)
+  - ✅ Maintains 3-model comparison methodology
+- **Impact**: Zero-cost constraint requires adapting to available resources
+- **Key Learning**: Real ML engineering = methodological rigor under practical constraints
+
+**Tasks:**
+- [x] Train EXAONE-2.4B (baseline) - ✅ Complete
+- [ ] Train Phi-4-mini-reasoning (3.8B) - replacing Llama-3.2-3B
 - [ ] Train Qwen2.5-Coder-3B
 - [ ] Compare all three models
 - [ ] Statistical significance testing
