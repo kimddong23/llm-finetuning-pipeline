@@ -19,9 +19,14 @@ import bitsandbytes as bnb
 
 # Configuration
 MODEL_NAME = "meta-llama/Llama-3.2-3B-Instruct"
-OUTPUT_DIR = "results/models/llama-3.2-3b-qlora"
-TRAIN_FILE = "data/processed/train.jsonl"
-EVAL_FILE = "data/processed/eval.jsonl"
+
+# Get project root directory (2 levels up from this script)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "results/models/llama-3.2-3b-qlora")
+TRAIN_FILE = os.path.join(PROJECT_ROOT, "data/processed/train.jsonl")
+EVAL_FILE = os.path.join(PROJECT_ROOT, "data/processed/eval.jsonl")
 
 # QLoRA settings (same as baseline)
 LORA_R = 16
