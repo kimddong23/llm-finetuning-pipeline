@@ -105,6 +105,10 @@ def setup_model_and_tokenizer():
     )
 
     model = get_peft_model(model, lora_config)
+
+    # Enable gradient for input embeddings (required for LoRA + gradient checkpointing)
+    model.enable_input_require_grads()
+
     model.print_trainable_parameters()
 
     return model, tokenizer
