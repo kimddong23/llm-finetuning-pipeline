@@ -6,6 +6,10 @@ Week 4: Model Comparison Experiment
 import os
 import sys
 import torch
+
+# Enable MPS fallback for unsupported operations
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+
 from datasets import load_dataset
 from transformers import (
     AutoModelForCausalLM,
@@ -53,11 +57,12 @@ def setup_model_and_tokenizer():
         tokenizer.pad_token = tokenizer.eos_token
 
     # Load model with 4-bit quantization
+    # device_map=None lets accelerate handle device placement
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_NAME,
         load_in_4bit=True,
         torch_dtype=torch.float16,
-        device_map="auto",
+        device_map=None,
         trust_remote_code=True,
     )
 
