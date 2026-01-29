@@ -48,26 +48,49 @@ EVAL_STEPS = 100
 SAVE_STEPS = 100
 
 def setup_model_and_tokenizer():
-    """Load model and tokenizer with 4-bit quantization."""
+    """Load model and tokenizer.
+
+    Note: Mac M3 Pro (MPS) does not support 4-bit quantization.
+    We use float16 instead, same as baseline training.
+    """
     print(f"Loading model: {MODEL_NAME}")
+
+    # Detect device
+    if torch.cuda.is_available():
+        device = "cuda"
+        print("Using CUDA with 4-bit quantization")
+    elif torch.backends.mps.is_available():
+        device = "mps"
+        print("Using MPS (Mac M3 Pro) with float16")
+    else:
+        device = "cpu"
+        print("Using CPU with float16")
 
     # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    # Load model with 4-bit quantization
-    # device_map=None lets accelerate handle device placement
-    model = AutoModelForCausalLM.from_pretrained(
-        MODEL_NAME,
-        load_in_4bit=True,
-        torch_dtype=torch.float16,
-        device_map=None,
-        trust_remote_code=True,
-    )
-
-    # Prepare for k-bit training
-    model = prepare_model_for_kbit_training(model)
+    # Load model based on device
+    if device == "cuda":
+        # CUDA: use 4-bit quantization
+        model = AutoModelForCausalLM.from_pretrained(
+            MODEL_NAME,
+            load_in_4bit=True,
+            torch_dtype=torch.float16,
+            device_map="auto",
+            trust_remote_code=True,
+        )
+        model = prepare_model_for_kbit_training(model)
+    else:
+        # MPS/CPU: use float16 without quantization
+        model = AutoModelForCausalLM.from_pretrained(
+            MODEL_NAME,
+            torch_dtype=torch.float16,
+            trust_remote_code=True,
+            low_cpu_mem_usage=True,
+        )
+        model = model.to(device)
 
     # Configure LoRA
     lora_config = LoraConfig(
