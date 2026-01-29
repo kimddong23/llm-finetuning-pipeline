@@ -1,0 +1,31 @@
+{
+  "base_model": "LGAI-EXAONE/EXAONE-3.5-2.4B-Instruct",
+  "adapter_path": "results/models/qlora-exaone-2.4b/best_model",
+  "device": "mps",
+  "quantization_results": [
+    {
+      "config": "FP16 (baseline)",
+      "model_size_mb": 4603.04,
+      "memory_usage_mb": -17.89,
+      "tokens_per_second": 12.5,
+      "generation_time": 3.999,
+      "sample_output": "def fibonacci(n):\n    if n <= 0:\n        return 0\n    elif n == 1:\n        return 1\n    else:\n        return fibonacci(n - 1) + fibonacci(n - 2)\n\n"
+    },
+    {
+      "config": "INT8",
+      "model_size_mb": 2559.29,
+      "memory_usage_mb": -536.12,
+      "tokens_per_second": 2.11,
+      "generation_time": 23.692,
+      "sample_output": "def fibonacci(n):\n    if n <= 0:\n        return 0\n    elif n == 1:\n        return 1\n    else:\n        return fibonacci(n-1) + fibonacci(n-2)\n\ndef fib"
+    },
+    {
+      "config": "INT4",
+      "model_size_mb": 1537.41,
+      "memory_usage_mb": -290.72,
+      "tokens_per_second": 0.8,
+      "generation_time": 62.482,
+      "sample_output": "def fibonacci(n):\n    \"\"\"\n    Fibonacci sequence\n    \"\"\"\n    if n == 0:\n        return 0\n    elif n == 1:\n        return 1\n    else:\n        return fibonacci(n - 1"
+    }
+  ]
+}

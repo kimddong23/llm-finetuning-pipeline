@@ -100,6 +100,85 @@ This project demonstrates a complete end-to-end pipeline for fine-tuning Large L
 
 ---
 
+## Deployment
+
+**Phase 4: Deployment** - ✅ Complete
+
+The trained model is available in multiple deployment formats:
+
+### 1. REST API
+
+FastAPI server with Swagger documentation:
+
+```bash
+cd deployment/api
+python main.py
+# Access: http://localhost:8000/docs
+```
+
+**Features:**
+- `/generate` - Code generation endpoint
+- `/health` - Health check
+- Auto-generated API docs (Swagger UI)
+- CORS enabled
+
+See [deployment/api/README.md](deployment/api/README.md) for details.
+
+### 2. Command Line Interface
+
+Interactive and batch code generation:
+
+```bash
+cd deployment/cli
+python codegen.py
+
+# Or batch mode
+python codegen.py --batch prompts.txt --output results.json
+```
+
+**Models available:**
+- `finetuned` (default) - Fine-tuned FP16
+- `base` - Original EXAONE model
+- `int8` - 44% smaller, slower
+- `int4` - 67% smaller, slowest
+
+See [deployment/cli/README.md](deployment/cli/README.md) for details.
+
+### 3. Docker Container
+
+Containerized deployment:
+
+```bash
+cd deployment/docker
+docker-compose up --build
+# Access: http://localhost:8000
+```
+
+See [deployment/docker/README.md](deployment/docker/README.md) for details.
+
+### 4. HuggingFace Spaces
+
+Gradio web interface (ready for deployment):
+
+```bash
+cd deployment/spaces
+# Follow DEPLOYMENT.md for step-by-step guide
+```
+
+See [deployment/spaces/DEPLOYMENT.md](deployment/spaces/DEPLOYMENT.md) for deployment instructions.
+
+### Model Optimization Results
+
+| Configuration | Size | Speed (tok/s) | Use Case |
+|--------------|------|---------------|----------|
+| **FP16** | 4.6 GB | 12.5 | Production (recommended) |
+| **INT8** | 2.6 GB | 2.1 | Edge devices |
+| **INT4** | 1.5 GB | 0.8 | Extreme constraints |
+
+See [deployment/optimization/benchmark_report.md](deployment/optimization/benchmark_report.md) for full benchmarks.
+
+---
+
 ## Dataset
 
 ### Source
@@ -371,12 +450,13 @@ llm-finetuning-pipeline/
 - [x] Benchmark comparison charts
 - [x] Technical report (12-page comprehensive documentation)
 
-### 📋 Phase 4: Deployment
-- [ ] Model optimization (quantization)
-- [ ] REST API implementation
-- [ ] Docker containerization
-- [ ] Deploy to HuggingFace Spaces
-- [ ] User documentation
+### ✅ Phase 4: Deployment (Complete)
+- [x] Model optimization (FP16, INT8, INT4 quantization)
+- [x] REST API implementation (FastAPI with Swagger docs)
+- [x] CLI tool (interactive and batch modes)
+- [x] Docker containerization (multi-stage build)
+- [x] HuggingFace Spaces (Gradio app ready for deployment)
+- [x] Comprehensive deployment documentation
 
 For detailed timeline and specifications, see [docs/MASTERPLAN_V2.md](docs/MASTERPLAN_V2.md).
 

@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile
+    container_name: codegen-api
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL_PATH=/app/models/best_model
+      - BASE_MODEL=LGAI-EXAONE/EXAONE-3.5-2.4B-Instruct
+    volumes:
+      # Mount model directory to avoid rebuilding for model updates
+      - ../../results/models/qlora-exaone-2.4b/best_model:/app/models/best_model:ro
+      # Optional: Mount API code for development
+      # - ../../deployment/api:/app/api:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G

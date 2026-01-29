@@ -1,0 +1,5 @@
+def fibonacci(n):
+def is_palindrome(s):
+def bubble_sort(arr):
+def binary_search(arr, target):
+def factorial(n):
